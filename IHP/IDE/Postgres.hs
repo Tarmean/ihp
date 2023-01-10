@@ -85,7 +85,7 @@ initDatabase = do
     Directory.createDirectoryIfMissing True "build/db"
 
     Process.callProcess "initdb" [
-                "build/db/state"
+                "-D build/db/state"
                 , "--no-locale" -- Avoid issues with impure host system locale in dev mode
                 , "--encoding"
                 , "UTF8"

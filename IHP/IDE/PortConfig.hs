@@ -40,7 +40,7 @@ isPortAvailable port = do
     Exception.bracket (Socket.socket Socket.AF_INET Socket.Stream 6) Socket.close' $ \socket -> do
         res <- Exception.try (Socket.connect socket address)
         case res of
-            Left e -> if (Errno <$> ioe_errno e) == Just eCONNREFUSED
+            Left e -> if (Errno <$> ioe_errno e) == Just eCONNREFUSED || ioe_description e == "Connection refused (WSAECONNREFUSED)"
                     then pure True
                     else throwIO e
             Right _ -> pure False

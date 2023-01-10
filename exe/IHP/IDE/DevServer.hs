@@ -6,7 +6,7 @@ import IHP.HaskellSupport
 import qualified Data.ByteString.Char8 as ByteString
 import Control.Concurrent (threadDelay, myThreadId)
 import System.Exit
-import System.Posix.Signals
+import System.Signal
 import qualified System.FSNotify as FS
 
 import IHP.IDE.Types
@@ -57,7 +57,7 @@ main = withUtf8 do
             state <- readIORef appStateRef
             stop state
             throwTo threadId ExitSuccess
-    installHandler sigINT (Catch catchHandler) Nothing
+    installHandler sigINT (const catchHandler)
 
     start
 
@@ -67,7 +67,7 @@ main = withUtf8 do
                 async Telemetry.reportTelemetry
                 forever do
                     appState <- readIORef appStateRef
-                    when isDebugMode (Log.debug $ " ===> " <> (tshow appState))
+                    when isDebugMode (Log.debug $ " ===> " <> tshow appState)
                     action <- takeMVar actionVar
                     when isDebugMode (Log.debug $ tshow action)
                     nextAppState <- handleAction appState action
@@ -87,8 +87,8 @@ handleAction state@(AppState { appGHCIState }) (UpdatePostgresState postgresStat
                     sendGhciCommand process "ClassyPrelude.uninterruptibleCancel app"
                     sendGhciCommand process ":r"
                     pure state { appGHCIState = AppGHCILoading { .. }, postgresState }
-                otherwise -> pure state { postgresState }
-        otherwise -> pure state { postgresState }
+                _ -> pure state { postgresState }
+        _ -> pure state { postgresState }
 handleAction state (UpdateAppGHCIState appGHCIState) = pure state { appGHCIState }
 handleAction state@(AppState { statusServerState = StatusServerNotStarted }) (UpdateStatusServerState statusServerState) = pure state { statusServerState }
 handleAction state@(AppState { statusServerState = StatusServerStarted { } }) (UpdateStatusServerState StatusServerNotStarted) = pure state { statusServerState = StatusServerNotStarted }
@@ -213,7 +213,7 @@ startGHCI = do
             , "-package-env -" -- Do not load `~/.ghc/arch-os-version/environments/name file`, global packages interfere with our packages
             , "-ignore-dot-ghci" -- Ignore the global ~/.ghc/ghci.conf That file sometimes causes trouble (specifically `:set +c +s`)
             , "-ghci-script", ".ghci" -- Because the previous line ignored default ghci config file locations, we have to manual load our .ghci
-            , "+RTS", "-A128m", "-n2m", "-H2m", "--nonmoving-gc", "-N"
+            , "+RTS", "-A128m", "-n2m", "-H2m", "-N"
             ]
     createManagedProcess (Process.proc "ghci" args)
             { Process.std_in = Process.CreatePipe

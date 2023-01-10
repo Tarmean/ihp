@@ -19,7 +19,8 @@ import Network.Wai
 import qualified Network.Wai.Handler.Warp as Warp
 import qualified Network.Wai.Middleware.Cors as Cors
 import qualified Network.Wai.Parse as WaiParse
-import qualified System.Posix.Env.ByteString as Posix
+import qualified Data.ByteString.Char8 as ByteString
+import qualified System.Environment as System
 import Data.String.Interpolate.IsString (i)
 import qualified Control.Exception as Exception
 import IHP.ModelSupport
@@ -213,7 +214,7 @@ envOrDefault name defaultValue = fromMaybe defaultValue <$> envOrNothing name
 {-# INLINABLE envOrDefault #-}
 
 envOrNothing :: (MonadIO monad) => EnvVarReader result => ByteString -> monad (Maybe result)
-envOrNothing name = configIO $ fmap parseString <$> Posix.getEnv name
+envOrNothing name = configIO $ fmap (parseString . ByteString.pack) <$> System.lookupEnv (ByteString.unpack name)
     where
         parseString string = case envStringToValue string of
             Left errorMessage -> error [i|Env var '#{name}' is invalid: #{errorMessage}|]

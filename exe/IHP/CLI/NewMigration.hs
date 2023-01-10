@@ -2,7 +2,7 @@ module Main where
 
 import IHP.Prelude
 import IHP.SchemaMigration
-import qualified System.Posix.Env.ByteString as Posix
+import qualified System.Environment as System
 import qualified System.Directory as Directory
 import IHP.IDE.ToolServer.Helper.Controller (openEditor)
 import qualified IHP.IDE.CodeGen.MigrationGenerator as MigrationGenerator
@@ -20,7 +20,7 @@ main = withUtf8 do
             putStrLn $ "Created migration: " <> path
             openEditor path 0 0
     
-    args <- Posix.getArgs
+    args <- System.getArgs
     case headMay args of
         Just "--help" -> usage
         Just description -> doCreateMigration (cs description)

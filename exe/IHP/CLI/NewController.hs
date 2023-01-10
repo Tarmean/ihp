@@ -2,7 +2,7 @@ module Main where
 
 import IHP.Prelude
 import qualified System.Directory as Directory
-import qualified System.Posix.Env.ByteString as Posix
+import qualified System.Environment as System
 import IHP.IDE.CodeGen.ControllerGenerator
 import IHP.IDE.CodeGen.Controller (executePlan)
 import qualified Data.Text as Text
@@ -12,11 +12,11 @@ main :: IO ()
 main = withUtf8 do
     ensureIsInAppDirectory
 
-    args <- map cs <$> Posix.getArgs
+    args <- System.getArgs
     case headMay args of
         Just "" -> usage
         Just appAndControllerName -> do
-            generateController appAndControllerName
+            generateController (cs appAndControllerName)
 
 usage :: IO ()
 usage = putStrLn "Usage: new-controller RESOURCE_NAME"

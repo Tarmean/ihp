@@ -2,7 +2,7 @@ module Main where
 
 import IHP.Prelude
 import qualified System.Directory as Directory
-import qualified System.Posix.Env.ByteString as Posix
+import qualified System.Environment as System
 import IHP.IDE.CodeGen.ApplicationGenerator
 import IHP.IDE.CodeGen.Controller (executePlan)
 import Main.Utf8 (withUtf8)
@@ -11,7 +11,7 @@ main :: IO ()
 main = withUtf8 do
     ensureIsInAppDirectory
 
-    args <- map cs <$> Posix.getArgs
+    args <- map cs <$> System.getArgs
     case headMay args of
         Just "" -> usage
         Just applicationName -> do

@@ -67,8 +67,8 @@ common shared-properties
             , async
             , network
             , unliftio
-            , unix
             , fsnotify
+            , signal
             , websockets
             , wai-websockets
             , regex-tdfa

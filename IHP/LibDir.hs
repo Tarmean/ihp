@@ -9,7 +9,6 @@ import IHP.Prelude
 import qualified System.Directory as Directory
 import qualified Data.Text as Text
 import qualified System.Process as Process
-import qualified System.Posix.Files as Files
 import qualified Control.Exception as Exception
 
 -- | Finds the lib
@@ -60,11 +59,11 @@ ensureSymlink = do
         --
         -- Therefore we retry this operation on error and try to remove a possible
         -- existing symlink in that case.
-        let createLink = Files.createSymbolicLink (cs libDir) "build/ihp-lib"
+        let createLink = Directory.createDirectoryLink (cs libDir) "build/ihp-lib"
 
         result <- Exception.try createLink
         case result of
             Left (exception :: SomeException) -> do
-                Files.removeLink "build/ihp-lib"
+                Directory.removeDirectoryLink "build/ihp-lib"
                 createLink
             Right ok -> pure ok

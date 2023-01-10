@@ -15,7 +15,7 @@ import qualified Database.PostgreSQL.Simple.FromField as PG
 import qualified Data.UUID.V4 as UUID
 import qualified Control.Concurrent as Concurrent
 import qualified Control.Concurrent.Async as Async
-import qualified System.Posix.Signals as Signals
+import qualified System.Signal as Signals
 import qualified System.Exit as Exit
 import qualified System.Timeout as Timeout
 import qualified IHP.PGListener as PGListener
@@ -110,10 +110,10 @@ installSignalHandlers :: IO (IO ())
 installSignalHandlers = do
     exitSignal <- Concurrent.newEmptyMVar
 
-    let catchHandler = Concurrent.putMVar exitSignal ()
+    let catchHandler _ = Concurrent.putMVar exitSignal ()
             
-    Signals.installHandler Signals.sigINT (Signals.Catch catchHandler) Nothing
-    Signals.installHandler Signals.sigTERM (Signals.Catch catchHandler) Nothing
+    Signals.installHandler Signals.sigINT catchHandler
+    Signals.installHandler Signals.sigTERM catchHandler
 
     pure (Concurrent.takeMVar exitSignal)
 

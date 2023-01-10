@@ -61,6 +61,8 @@ run configBuilder = do
             let requestLoggerMiddleware = get #requestLoggerMiddleware frameworkConfig
             let CustomMiddleware customMiddleware = get #customMiddleware frameworkConfig
 
+            putStrLn ("Config: " <> cs (show (get #appHostname frameworkConfig, get #baseUrl frameworkConfig,  get #appPort frameworkConfig, get #environment frameworkConfig)))
+
             withBackgroundWorkers pgListener frameworkConfig 
                 . runServer frameworkConfig
                 . customMiddleware
